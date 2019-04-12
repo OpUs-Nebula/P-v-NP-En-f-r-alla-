@@ -21,30 +21,30 @@ class TestHelper:
         self.algorithms.append(func)
 
 #Sorting graph generation
-sortPlot = pH("input size","running time(s)")
+def sorting_test():
+    sortPlot = pH("input size","running time(s)")
+    test = TestHelper(1000)
+    test.queue_sort(merge_sort)
+    test.queue_sort(insertion_sort)
 
-test = TestHelper(1000)
-test.queue_sort(merge_sort)
-test.queue_sort(insertion_sort)
-
-for algo in test.algorithms:
-    for array in test.unordered:
-        start_time = time.time()
-        algo(array)
-        duration = time.time() - start_time
-        sortPlot.addDataPoint(len(array),duration)
-    sortPlot.plot()
-
-#sortPlot.plot()
-#print("Domain is currently {}".format(sortPlot.domain))
-#time.sleep(5)
-sortPlot.finalize()
+    for algo in test.algorithms:
+        for array in test.unordered:
+            start_time = time.time()
+            algo(array)
+            duration = time.time() - start_time
+            sortPlot.addDataPoint(len(array),duration)
+        sortPlot.plot()
+    sortPlot.finalize()
 
 #Neural network graph generation
-
 """
 Notes:
 - X = training time, Y = accuracy
 - Plot training acc vs evaluation accuracy for demonstration of overfitting
 - Layer depth variation? mebe
 """
+def neural_inference_test():
+    appData = pd.read_csv("googleplaystore.csv")
+    print(appData.shape)
+
+neural_inference_test()
