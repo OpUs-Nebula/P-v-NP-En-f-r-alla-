@@ -1,7 +1,11 @@
 import time
 import random
+import pandas as pd
 from StatisticsHelper import PlotHelper as pH
 from algorithms.sort import merge_sort, insertion_sort
+from sklearn.metrics import mean_absolute_error
+from sklearn.model_selection import train_test_split
+from sklearn.neural_network import MLPRegressor
 
 #Separating graphs between sorting/training might be helpful, as generating enough datapoints for neural networks will
 #Be much more tedious than for sorting algorithms.
@@ -16,10 +20,8 @@ class TestHelper:
     def queue_sort(self,func):
         self.algorithms.append(func)
 
-
-#newPlot = pH("input size/training time(min)","running time(s)/accuracy(%)")
-
-newPlot = pH("input size","running time(s)")
+#Sorting graph generation
+sortPlot = pH("input size","running time(s)")
 
 test = TestHelper(1000)
 test.queue_sort(merge_sort)
@@ -30,10 +32,19 @@ for algo in test.algorithms:
         start_time = time.time()
         algo(array)
         duration = time.time() - start_time
-        newPlot.addDataPoint(len(array),duration)
-    newPlot.plot()
+        sortPlot.addDataPoint(len(array),duration)
+    sortPlot.plot()
 
-#newPlot.plot()
-#print("Domain is currently {}".format(newPlot.domain))
+#sortPlot.plot()
+#print("Domain is currently {}".format(sortPlot.domain))
 #time.sleep(5)
-newPlot.finalize()
+sortPlot.finalize()
+
+#Neural network graph generation
+
+"""
+Notes:
+- X = training time, Y = accuracy
+- Plot training acc vs evaluation accuracy for demonstration of overfitting
+- Layer depth variation? mebe
+"""
