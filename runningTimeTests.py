@@ -1,6 +1,7 @@
 import time
 import random
 import pandas as pd
+import numpy as np
 from StatisticsHelper import PlotHelper as pH
 from algorithms.sort import merge_sort, insertion_sort
 from sklearn.metrics import mean_absolute_error
@@ -38,11 +39,17 @@ def sorting_test():
 
 #Neural network graph generation
 
+"""
+Note: 
 
-def clean_ensamble(columns):
-    fncmap = {"Size":clean_sizepref,"Reviews":int}
-    for columns in fncmap.keys():
-        
+Might be worth packaging clean methods in seperate module
+"""
+def clean_ensamble(df, columns):
+    fncmap = {"Size":clean_sizepref,"Current Ver":clean_ver ,"Reviews":int}
+    for mapped in fncmap.keys():
+        if mapped in columns:
+            df[mapped] = df[mapped].apply(fncmap[mapped])
+    return df.dropna()
 
 def clean_sizepref(x):
     sep = list(x)
@@ -50,30 +57,54 @@ def clean_sizepref(x):
     consts = {"M":1, "k":0.001}
     if pref in ["M","k"]:
         fin = consts[pref]*float("".join(sep))
-        print(fin)
     else:
         fin = 0
     return fin
+
+def clean_ver(x):
+    ret = np.nan
+    if not isinstance(x, float):
+        comps = list(x) if x != ret else ["V"]
+        if comps[0].isdigit():
+            trunc = []
+            decSep = True
+            iterN = 0
+            end = False
+            while iterN<len(comps) and not end:
+                cand = comps[iterN]
+                if cand.isdigit(): 
+                    trunc.append(cand)
+                else:
+                    if decSep:
+                        trunc.append(".")
+                        decSep = False
+                    else:
+                        if not cand in [".", ","]:
+                            end = True
+                iterN+=1
+            ret = float("".join(trunc))
+    return ret
 
 """
 Notes:
 - X = training time, Y = accuracy
 - Plot training acc vs evaluation accuracy for demonstration of overfitting
 - Layer depth variation? mebe
+Currently clean fnc mapped(or don't need):
+Size, Current Ver, Reviews
+
 """
 def neural_inference_test(input_fields):
-    input_fields = ["Size","Current Ver","Reviews"]
     appData = pd.read_csv("googleplaystore.csv",parse_dates=True, thousands="k")
-    DataPoints = ["Size","Current Ver","Reviews"] #Might add last updated if algorithm for calculating time from data gathering to last updated is easy enough
-#solution to size being string: string.split, remove last, join, .asfloat()
-    X = appData[DataPoints] #call clean_ensamble during assignment? saves problem of modifying original dataframe.
-    X["Size"] = X["Size"].apply(clean_sizepref)
+    appData = appData.drop(appData.index[10472]) #Faulty row, had megabyte spec in reviews.
+    X = clean_ensamble(appData[input_fields],input_fields)
     Y = pd.to_numeric(appData["Rating"])
     print(X.shape)
     print(X.info)
     print(X.dtypes)
     print(Y.dtypes)
 
-
-input = "Size","Current Ver","Reviews"
-neural_inference_test()
+#Might be worthwhile to add parameter for Y to test aswell
+#Might add last updated if algorithm for calculating time from data gathering to last updated is easy enough
+neuralInput = ["Size","Current Ver","Reviews"]
+neural_inference_test(neuralInput)
