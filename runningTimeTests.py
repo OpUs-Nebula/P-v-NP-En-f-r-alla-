@@ -96,8 +96,9 @@ Size, Current Ver, Reviews
 """
 def neural_inference_test(input_fields):
     appData = pd.read_csv("googleplaystore.csv",parse_dates=True, thousands="k")
-    appData = appData.drop(appData.index[10472]) #Faulty row, had megabyte spec in reviews.
-    X = clean_ensamble(appData[input_fields],input_fields)
+    appData = clean_ensamble(appData.drop(appData.index[10472]),input_fields) #Faulty row, had megabyte spec in reviews.
+    
+    X = appData[input_fields]
     Y = pd.to_numeric(appData["Rating"])
     print(X.shape)
     print(X.info)
