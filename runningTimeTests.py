@@ -37,14 +37,43 @@ def sorting_test():
     sortPlot.finalize()
 
 #Neural network graph generation
+
+
+def clean_ensamble(columns):
+    fncmap = {"Size":clean_sizepref,"Reviews":int}
+    for columns in fncmap.keys():
+        
+
+def clean_sizepref(x):
+    sep = list(x)
+    pref = sep.pop()
+    consts = {"M":1, "k":0.001}
+    if pref in ["M","k"]:
+        fin = consts[pref]*float("".join(sep))
+        print(fin)
+    else:
+        fin = 0
+    return fin
+
 """
 Notes:
 - X = training time, Y = accuracy
 - Plot training acc vs evaluation accuracy for demonstration of overfitting
 - Layer depth variation? mebe
 """
-def neural_inference_test():
-    appData = pd.read_csv("googleplaystore.csv")
-    print(appData.shape)
+def neural_inference_test(input_fields):
+    input_fields = ["Size","Current Ver","Reviews"]
+    appData = pd.read_csv("googleplaystore.csv",parse_dates=True, thousands="k")
+    DataPoints = ["Size","Current Ver","Reviews"] #Might add last updated if algorithm for calculating time from data gathering to last updated is easy enough
+#solution to size being string: string.split, remove last, join, .asfloat()
+    X = appData[DataPoints] #call clean_ensamble during assignment? saves problem of modifying original dataframe.
+    X["Size"] = X["Size"].apply(clean_sizepref)
+    Y = pd.to_numeric(appData["Rating"])
+    print(X.shape)
+    print(X.info)
+    print(X.dtypes)
+    print(Y.dtypes)
 
+
+input = "Size","Current Ver","Reviews"
 neural_inference_test()
