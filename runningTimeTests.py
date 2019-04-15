@@ -42,23 +42,22 @@ def sorting_test():
 #Neural network graph generation
 """
 Notes:
-- X = training time, Y = accuracy
+- X = depth/sample size(separate graphs), Y = accuracy
 - Plot training acc vs evaluation accuracy for demonstration of overfitting
 - Layer depth variation? mebe
 - https://stackoverflow.com/questions/41308662/how-to-tune-a-mlpregressor
+- https://stats.stackexchange.com/questions/222883/why-are-neural-networks-becoming-deeper-but-not-wider
 - For loop cutting down training sample for each run?
 Currently clean fnc mapped(or don't need):
 Size, Current Ver, Reviews
 """
 
-def train_predict_ratings (X_Trn, Y_Trn, X_Val, Y_Val):
+def train_predict_ratings (X_Trn, Y_Trn, X_Val):
     model = MLPRegressor()
     model.fit(X_Trn, Y_Trn)   
     Prds = model.predict(X_Val)
 
     return Prds
-
-
 
 def norm_df(target):
     return (target - target.min()) / (target.max() - target.min())
@@ -74,28 +73,48 @@ def neural_inference_test(input_fields, verbose=False):
     norm_columns = input_fields+["Rating"]
     normalized_appData = norm_df(appData[norm_columns]) #Neural network sensetive to normalization
 
-    print("Dataset:")
-    print(appData[norm_columns])
+    #print("Dataset:")
+    #print(appData[norm_columns])
 
     X = normalized_appData[input_fields]
     Y = normalized_appData["Rating"]
 
     train_X, val_X, train_y, val_y = train_test_split(X, Y, random_state = 0)
+
+    #if verbose:
+    #    train_size = train_X.shape
+    #    print("Shape training sample: x={}, y={}".format(train_size[0],train_y.shape[0]))
+    #    print(train_X.iloc[train_size[0]-1])
     
-    norm_pred = train_predict_ratings(train_X, train_y, val_X, val_y)
+    accPlot = pH("sample size","mean absolute error")
 
-    ground_truth = inverse_df(appData["Rating"],pd.DataFrame(val_y, columns=["Rating"]))
-    predictions = inverse_df(appData["Rating"],pd.DataFrame(norm_pred, columns=["Rating"])) 
-    mae = mean_absolute_error(ground_truth, predictions)
+    for sample_size in range(1,train_X.shape[0]+1, 20):
+        norm_pred = train_predict_ratings(train_X.iloc[0:sample_size], train_y.iloc[0:sample_size], val_X)
+        ground_truth = inverse_df(appData["Rating"],pd.DataFrame(val_y, columns=["Rating"]))
+        predictions = inverse_df(appData["Rating"],pd.DataFrame(norm_pred, columns=["Rating"])) 
+        mae = mean_absolute_error(ground_truth, predictions)
+        accPlot.addDataPoint(sample_size, mae)
+        if sample_size % 1 == 0:
+            print("Current sample size being evaluated: {}".format(sample_size))
 
-    if verbose:
-        print("To be predicted:")
-        print(ground_truth)
+    accPlot.plot()
+    accPlot.finalize()
+    
+#Moved into for loop:
+    #norm_pred = train_predict_ratings(train_X, train_y, val_X)
+    #ground_truth = inverse_df(appData["Rating"],pd.DataFrame(val_y, columns=["Rating"]))
+    #predictions = inverse_df(appData["Rating"],pd.DataFrame(norm_pred, columns=["Rating"])) 
+    #mae = mean_absolute_error(ground_truth, predictions)
 
-        print("Resulting predictions:")
-        print(predictions)
+    #if verbose:
+        #print("To be predicted:")
+        #print(ground_truth)
 
-    print("Mean Absolute Error is: {}".format(mae))
+        #print("Resulting predictions:")
+        #print(predictions)
+
+    #To be replaced by graph
+    #print("Mean Absolute Error is: {}".format(mae))
 
 #Might be worthwhile to add parameter for Y to test aswell
 #Might add last updated if algorithm for calculating time from data gathering to last updated is easy enough
