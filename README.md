@@ -1,4 +1,4 @@
-#ABSTRACT
+# ABSTRACT
 
 The purpose of this essay is to examine how the computational complexity inherent to algorithms used
 for different problems in computer science affects their running time, and in some cases accuracy,
